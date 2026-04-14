@@ -1,12 +1,12 @@
 import { toMcpContent } from '../schemas/outputs.js';
 import { ok } from '../../types/toolContracts.js';
-import { runSetup } from '../../services/setupService.js';
+import { startSetup } from '../../services/setupService.js';
 import { SetupInputType } from '../schemas/inputs.js';
 
 export async function handleSetup(
   args: SetupInputType,
 ): Promise<ReturnType<typeof toMcpContent>> {
-  const result = await runSetup({
+  const { orgUrl, deviceCode } = await startSetup({
     orgUrl: args.orgUrl,
     allowedProjects: args.allowedProjects,
     enableDelete: args.enableDelete,
@@ -14,13 +14,15 @@ export async function handleSetup(
 
   return toMcpContent(
     ok({
-      message: 'Setup complete. All tools are ready to use.',
-      orgUrl: result.orgUrl,
-      allowedProjects: result.allowedProjects.length
-        ? result.allowedProjects
-        : 'all accessible projects',
-      deleteEnabled: result.enableDelete,
-      authenticated: result.authenticated,
+      status: 'sign_in_required',
+      orgUrl,
+      signIn: {
+        url: deviceCode.verificationUri,
+        code: deviceCode.userCode,
+        instruction: `Go to ${deviceCode.verificationUri} and enter code: ${deviceCode.userCode}`,
+        expiresAt: deviceCode.expiresAt,
+      },
+      next: 'After signing in, call confirm_auth to complete setup.',
     }),
   );
 }

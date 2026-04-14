@@ -104,6 +104,8 @@ export const GetTicketHierarchyInput = z.object({
     .describe('Max hierarchy depth to traverse (default 4: Epic→Feature→Story→Task)'),
 });
 
+export const ConfirmAuthInput = z.object({});
+
 export const SetupInput = z.object({
   orgUrl: z
     .string()
@@ -133,3 +135,4 @@ export type AddTicketCommentInputType = z.infer<typeof AddTicketCommentInput>;
 export type DeleteTicketInputType = z.infer<typeof DeleteTicketInput>;
 export type GetTicketHierarchyInputType = z.infer<typeof GetTicketHierarchyInput>;
 export type SetupInputType = z.infer<typeof SetupInput>;
+export type ConfirmAuthInputType = z.infer<typeof ConfirmAuthInput>;

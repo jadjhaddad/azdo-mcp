@@ -6,6 +6,7 @@ import { AzdoMcpError } from '../utils/errors.js';
 
 import {
   SetupInput,
+  ConfirmAuthInput,
   ListProjectsInput,
   ListMyTicketsInput,
   GetTicketInput,
@@ -20,6 +21,7 @@ import {
 
 // Tool handlers
 import { handleSetup } from './tools/setup.js';
+import { handleConfirmAuth } from './tools/confirmAuth.js';
 import { handleListProjects } from './tools/listProjects.js';
 import { handleListMyTickets } from './tools/listMyTickets.js';
 import { handleGetTicket } from './tools/getTicket.js';
@@ -61,6 +63,19 @@ export function registerTools(server: McpServer): void {
       inputSchema: SetupInput,
     },
     safe('setup', handleSetup),
+  );
+
+  server.registerTool(
+    'confirm_auth',
+    {
+      title: 'Confirm Auth',
+      description:
+        'Check whether the Microsoft sign-in (started by setup) has completed. ' +
+        'Call this after the user has signed in at the device code URL. ' +
+        'Returns status: "authenticated" when done, or "pending" if still waiting.',
+      inputSchema: ConfirmAuthInput,
+    },
+    safe('confirm_auth', handleConfirmAuth),
   );
 
   server.registerTool(
@@ -168,5 +183,5 @@ export function registerTools(server: McpServer): void {
     safe('get_ticket_hierarchy', handleGetTicketHierarchy),
   );
 
-  logger.info('All 11 tools registered');
+  logger.info('All 12 tools registered');
 }
