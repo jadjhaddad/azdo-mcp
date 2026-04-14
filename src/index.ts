@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { loadFileConfig } from './config/fileConfig.js';
 import { getEnv } from './config/env.js';
 import { logger } from './utils/logger.js';
 import { registerTools } from './mcp/registry.js';
 
 async function main(): Promise<void> {
-  // Parse what's available — AZDO_ORG_URL is optional here and validated
-  // lazily on first API call so the server always starts cleanly.
+  // Load saved config from ~/.azdo-mcp/config.json (written by CLI/web setup)
+  loadFileConfig();
+
   const env = getEnv();
 
   const server = new McpServer({
