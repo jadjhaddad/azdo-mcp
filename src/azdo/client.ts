@@ -11,6 +11,13 @@ async function buildClient(): Promise<AxiosInstance> {
   const { authHeader } = await resolveAuth();
   const { AZDO_ORG_URL } = getEnv();
 
+  if (!AZDO_ORG_URL) {
+    throw new Error(
+      'AZDO_ORG_URL is not configured. Add it to the MCP server environment:\n' +
+      '  AZDO_ORG_URL=https://dev.azure.com/your-org',
+    );
+  }
+
   const client = axios.create({
     baseURL: AZDO_ORG_URL,
     headers: {

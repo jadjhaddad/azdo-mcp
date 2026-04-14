@@ -1,10 +1,13 @@
 import { z } from 'zod';
 
 const EnvSchema = z.object({
+  // Optional at startup — validated lazily on first API call so the server
+  // always starts successfully even without config.
   AZDO_ORG_URL: z
     .string()
     .url('AZDO_ORG_URL must be a valid URL, e.g. https://dev.azure.com/my-org')
-    .transform((u) => u.replace(/\/$/, '')), // strip trailing slash
+    .transform((u) => u.replace(/\/$/, ''))
+    .optional(),
   // Optional — if absent, device code flow is used at first request
   AZDO_TOKEN: z.string().optional(),
   AZDO_ALLOWED_PROJECTS: z

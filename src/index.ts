@@ -6,14 +6,9 @@ import { logger } from './utils/logger.js';
 import { registerTools } from './mcp/registry.js';
 
 async function main(): Promise<void> {
-  let env;
-  try {
-    env = getEnv();
-  } catch (err) {
-    // Config errors are fatal — write to stderr and exit
-    process.stderr.write(`[azdo-mcp] ${String(err)}\n`);
-    process.exit(1);
-  }
+  // Parse what's available — AZDO_ORG_URL is optional here and validated
+  // lazily on first API call so the server always starts cleanly.
+  const env = getEnv();
 
   const server = new McpServer({
     name: env.SERVER_NAME,
@@ -26,6 +21,10 @@ async function main(): Promise<void> {
   await server.connect(transport);
 
   logger.info({ name: env.SERVER_NAME, version: env.SERVER_VERSION }, 'azdo-mcp server running');
+
+  if (!env.AZDO_ORG_URL) {
+    logger.warn('AZDO_ORG_URL not set — set it in the MCP server env config before calling any tools');
+  }
 }
 
 main().catch((err) => {
