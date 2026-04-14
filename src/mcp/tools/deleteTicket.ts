@@ -1,7 +1,16 @@
 import { toMcpContent } from '../schemas/outputs.js';
-import { fail } from '../../types/toolContracts.js';
+import { ok } from '../../types/toolContracts.js';
+import { executeDelete } from '../../services/deleteService.js';
+import { DeleteTicketInputType } from '../schemas/inputs.js';
 
-// Phase 0 stub — replaced in Phase 1/2/3
-export async function handleDeleteTicket(_args: unknown): Promise<ReturnType<typeof toMcpContent>> {
-  return toMcpContent(fail('INTERNAL_ERROR', 'deleteTicket not yet implemented', undefined, false));
+export async function handleDeleteTicket(
+  args: DeleteTicketInputType,
+): Promise<ReturnType<typeof toMcpContent>> {
+  await executeDelete({
+    id: args.id,
+    confirm: args.confirm,
+    hardDelete: args.hardDelete,
+  });
+
+  return toMcpContent(ok({ deleted: true, id: args.id }));
 }
