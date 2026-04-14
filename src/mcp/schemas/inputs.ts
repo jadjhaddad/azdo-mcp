@@ -92,6 +92,18 @@ export const DeleteTicketInput = z.object({
     .describe('Permanently destroy — always false unless explicitly enabled in policy'),
 });
 
+export const GetTicketHierarchyInput = z.object({
+  id: z.number().int().positive().describe('Root work item ID (typically an Epic or Feature)'),
+  maxDepth: z
+    .number()
+    .int()
+    .min(1)
+    .max(6)
+    .optional()
+    .default(4)
+    .describe('Max hierarchy depth to traverse (default 4: Epic→Feature→Story→Task)'),
+});
+
 // ─── Inferred input types ─────────────────────────────────────────────────────
 
 export type ListProjectsInputType = z.infer<typeof ListProjectsInput>;
@@ -103,3 +115,4 @@ export type UpdateTicketInputType = z.infer<typeof UpdateTicketInput>;
 export type TransitionTicketInputType = z.infer<typeof TransitionTicketInput>;
 export type AddTicketCommentInputType = z.infer<typeof AddTicketCommentInput>;
 export type DeleteTicketInputType = z.infer<typeof DeleteTicketInput>;
+export type GetTicketHierarchyInputType = z.infer<typeof GetTicketHierarchyInput>;

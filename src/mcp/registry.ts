@@ -8,6 +8,7 @@ import {
   ListProjectsInput,
   ListMyTicketsInput,
   GetTicketInput,
+  GetTicketHierarchyInput,
   SearchTicketsInput,
   CreateTicketInput,
   UpdateTicketInput,
@@ -26,6 +27,7 @@ import { handleUpdateTicket } from './tools/updateTicket.js';
 import { handleTransitionTicket } from './tools/transitionTicket.js';
 import { handleAddTicketComment } from './tools/addTicketComment.js';
 import { handleDeleteTicket } from './tools/deleteTicket.js';
+import { handleGetTicketHierarchy } from './tools/getTicketHierarchy.js';
 
 /** Wrap any handler so unhandled throws become clean error envelopes */
 function safe<T extends Record<string, unknown>>(
@@ -139,5 +141,17 @@ export function registerTools(server: McpServer): void {
     safe('delete_ticket', handleDeleteTicket),
   );
 
-  logger.info('All 9 tools registered');
+  server.registerTool(
+    'get_ticket_hierarchy',
+    {
+      title: 'Get Ticket Hierarchy',
+      description:
+        'Fetch the full parent→child hierarchy tree rooted at a work item (typically an Epic or Feature). ' +
+        'Returns Epic→Feature→Story→Task structure suitable for LLM reasoning about scope and dependencies.',
+      inputSchema: GetTicketHierarchyInput,
+    },
+    safe('get_ticket_hierarchy', handleGetTicketHierarchy),
+  );
+
+  logger.info('All 10 tools registered');
 }

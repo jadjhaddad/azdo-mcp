@@ -1,7 +1,12 @@
 import { toMcpContent } from '../schemas/outputs.js';
-import { fail } from '../../types/toolContracts.js';
+import { ok } from '../../types/toolContracts.js';
+import { fetchTicket } from '../../services/ticketService.js';
+import { GetTicketInputType } from '../schemas/inputs.js';
 
-// Phase 0 stub — replaced in Phase 1/2/3
-export async function handleGetTicket(_args: unknown): Promise<ReturnType<typeof toMcpContent>> {
-  return toMcpContent(fail('INTERNAL_ERROR', 'getTicket not yet implemented', undefined, false));
+export async function handleGetTicket(
+  args: GetTicketInputType,
+): Promise<ReturnType<typeof toMcpContent>> {
+  const wi = await fetchTicket(args.id, args.expand);
+
+  return toMcpContent(ok({ id: wi.id, rev: wi.rev, fields: wi.fields, url: wi.url }));
 }
