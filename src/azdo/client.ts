@@ -7,8 +7,8 @@ import { logger } from '../utils/logger.js';
 
 const API_VERSION = '7.2-preview';
 
-function buildClient(): AxiosInstance {
-  const { authHeader } = resolveAuth();
+async function buildClient(): Promise<AxiosInstance> {
+  const { authHeader } = await resolveAuth();
   const { AZDO_ORG_URL } = getEnv();
 
   const client = axios.create({
@@ -43,14 +43,14 @@ function buildClient(): AxiosInstance {
   return client;
 }
 
-/** Returns a fresh client per call so token changes in env take effect immediately */
-function getClient(): AxiosInstance {
+/** Returns a fresh client per call so token changes (and MSAL refresh) take effect immediately */
+async function getClient(): Promise<AxiosInstance> {
   return buildClient();
 }
 
 export async function azdoGet<T>(path: string, params?: Record<string, unknown>): Promise<T> {
   try {
-    const res = await getClient().get<T>(path, {
+    const res = await (await getClient()).get<T>(path, {
       params: { 'api-version': API_VERSION, ...params },
     });
     return res.data;
@@ -65,7 +65,7 @@ export async function azdoPost<T>(
   params?: Record<string, unknown>,
 ): Promise<T> {
   try {
-    const res = await getClient().post<T>(path, body, {
+    const res = await (await getClient()).post<T>(path, body, {
       params: { 'api-version': API_VERSION, ...params },
     });
     return res.data;
@@ -81,7 +81,7 @@ export async function azdoPatch<T>(
   config?: AxiosRequestConfig,
 ): Promise<T> {
   try {
-    const res = await getClient().patch<T>(path, body, {
+    const res = await (await getClient()).patch<T>(path, body, {
       params: { 'api-version': API_VERSION, ...params },
       ...config,
     });
@@ -93,7 +93,7 @@ export async function azdoPatch<T>(
 
 export async function azdoDelete(path: string, params?: Record<string, unknown>): Promise<void> {
   try {
-    await getClient().delete(path, {
+    await (await getClient()).delete(path, {
       params: { 'api-version': API_VERSION, ...params },
     });
   } catch (err) {

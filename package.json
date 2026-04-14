@@ -7,7 +7,7 @@
     "azdo-mcp": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --external:@modelcontextprotocol/sdk --external:axios --external:axios-retry --external:pino --external:zod --external:@azure/msal-node",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "test": "jest",
@@ -16,6 +16,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@azure/msal-node": "^5.1.2",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "axios": "^1.7.9",
     "axios-retry": "^4.5.0",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^20.17.0",
+    "esbuild": "^0.28.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
@@ -33,7 +35,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testMatch": ["**/tests/**/*.test.ts"],
+    "testMatch": [
+      "**/tests/**/*.test.ts"
+    ],
     "moduleNameMapper": {
       "^(\\.{1,2}/.*)\\.js$": "$1"
     }

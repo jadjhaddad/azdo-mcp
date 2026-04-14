@@ -5,7 +5,8 @@ const EnvSchema = z.object({
     .string()
     .url('AZDO_ORG_URL must be a valid URL, e.g. https://dev.azure.com/my-org')
     .transform((u) => u.replace(/\/$/, '')), // strip trailing slash
-  AZDO_TOKEN: z.string().min(1, 'AZDO_TOKEN is required'),
+  // Optional — if absent, device code flow is used at first request
+  AZDO_TOKEN: z.string().optional(),
   AZDO_ALLOWED_PROJECTS: z
     .string()
     .optional()

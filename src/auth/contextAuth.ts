@@ -1,48 +1,44 @@
 /**
- * Auth adapter — token is injected externally (env var, host layer, or per-session context).
- * When a 401 is returned by AzDO, callers surface AUTH_REQUIRED so the host
- * can inject a fresh token and retry.  No tokens are stored, cached, or returned in output.
+ * Auth adapter — resolves the Authorization header for AzDO API calls.
+ *
+ * Priority:
+ *   1. AZDO_TOKEN env var (PAT or Bearer) — static, no user interaction
+ *   2. Device code flow via MSAL — user signs in via browser once per session;
+ *      subsequent calls use silent token refresh automatically.
+ *
+ * Tokens are NEVER returned in tool output or logged.
  */
 import { getEnv } from '../config/env.js';
-import { AuthRequiredError } from '../utils/errors.js';
+import { acquireToken } from './deviceCodeAuth.js';
+import { logger } from '../utils/logger.js';
 
 export interface AuthContext {
   /** Pre-built Authorization header value — never log this */
   authHeader: string;
-  /** Display-safe identity hint (email/UPN) — may be empty for PATs */
+  /** Display-safe identity hint (email/UPN) */
   actorHint: string;
 }
 
 /**
- * Resolve auth context from environment.
- * Supports:
- *   - PAT (Personal Access Token): passed via AZDO_TOKEN — encoded as Basic :<pat>
- *   - Bearer token: if AZDO_TOKEN starts with "Bearer " it is used as-is
- *
- * Throws AuthRequiredError when no token is configured so callers get a clean
- * AUTH_REQUIRED envelope and know to re-inject credentials.
+ * Resolve an AuthContext for the current request.
+ * Async because device code flow (when triggered) must await user sign-in.
  */
-export function resolveAuth(): AuthContext {
-  let token: string;
-  try {
-    token = getEnv().AZDO_TOKEN;
-  } catch {
-    throw new AuthRequiredError('AZDO_TOKEN not configured');
+export async function resolveAuth(): Promise<AuthContext> {
+  const env = getEnv();
+  const staticToken = env.AZDO_TOKEN;
+
+  // ── Static token path (PAT or Bearer) ────────────────────────────────────
+  if (staticToken) {
+    if (staticToken.startsWith('Bearer ')) {
+      return { authHeader: staticToken, actorHint: '' };
+    }
+    // PAT — AzDO Basic auth: base64(":<pat>")
+    const encoded = Buffer.from(`:${staticToken}`).toString('base64');
+    return { authHeader: `Basic ${encoded}`, actorHint: '' };
   }
 
-  if (!token) {
-    throw new AuthRequiredError('AZDO_TOKEN is empty — re-inject a valid token');
-  }
-
-  // Bearer token passed directly (short-lived; host refreshes on 401)
-  if (token.startsWith('Bearer ')) {
-    return { authHeader: token, actorHint: '' };
-  }
-
-  // PAT — Azure DevOps expects Basic auth with empty username: base64(":<pat>")
-  const encoded = Buffer.from(`:${token}`).toString('base64');
-  return {
-    authHeader: `Basic ${encoded}`,
-    actorHint: '',
-  };
+  // ── Device code / MSAL path ───────────────────────────────────────────────
+  logger.info('No AZDO_TOKEN set — initiating device code authentication');
+  const accessToken = await acquireToken();
+  return { authHeader: `Bearer ${accessToken}`, actorHint: '' };
 }
