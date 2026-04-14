@@ -104,6 +104,22 @@ export const GetTicketHierarchyInput = z.object({
     .describe('Max hierarchy depth to traverse (default 4: Epic→Feature→Story→Task)'),
 });
 
+export const SetupInput = z.object({
+  orgUrl: z
+    .string()
+    .url()
+    .describe('Your Azure DevOps organisation URL, e.g. https://dev.azure.com/my-org'),
+  allowedProjects: z
+    .array(z.string().min(1))
+    .optional()
+    .describe('Projects this server may access. Leave empty to allow all projects the token can see.'),
+  enableDelete: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe('Enable the delete_ticket tool (requires confirmation token per deletion)'),
+});
+
 // ─── Inferred input types ─────────────────────────────────────────────────────
 
 export type ListProjectsInputType = z.infer<typeof ListProjectsInput>;
@@ -116,3 +132,4 @@ export type TransitionTicketInputType = z.infer<typeof TransitionTicketInput>;
 export type AddTicketCommentInputType = z.infer<typeof AddTicketCommentInput>;
 export type DeleteTicketInputType = z.infer<typeof DeleteTicketInput>;
 export type GetTicketHierarchyInputType = z.infer<typeof GetTicketHierarchyInput>;
+export type SetupInputType = z.infer<typeof SetupInput>;

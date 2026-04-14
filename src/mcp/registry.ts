@@ -5,6 +5,7 @@ import { fail } from '../types/toolContracts.js';
 import { AzdoMcpError } from '../utils/errors.js';
 
 import {
+  SetupInput,
   ListProjectsInput,
   ListMyTicketsInput,
   GetTicketInput,
@@ -17,7 +18,8 @@ import {
   DeleteTicketInput,
 } from './schemas/inputs.js';
 
-// Tool handlers — imported lazily so each phase can fill them in
+// Tool handlers
+import { handleSetup } from './tools/setup.js';
 import { handleListProjects } from './tools/listProjects.js';
 import { handleListMyTickets } from './tools/listMyTickets.js';
 import { handleGetTicket } from './tools/getTicket.js';
@@ -48,6 +50,19 @@ function safe<T extends Record<string, unknown>>(
 }
 
 export function registerTools(server: McpServer): void {
+  server.registerTool(
+    'setup',
+    {
+      title: 'Setup',
+      description:
+        'First-time configuration wizard. Provide your Azure DevOps org URL and optional project list, ' +
+        'then authenticate via Microsoft sign-in (device code — no PAT needed). ' +
+        'Call this before any other tool if AZDO_ORG_URL is not already configured.',
+      inputSchema: SetupInput,
+    },
+    safe('setup', handleSetup),
+  );
+
   server.registerTool(
     'list_projects',
     {
@@ -153,5 +168,5 @@ export function registerTools(server: McpServer): void {
     safe('get_ticket_hierarchy', handleGetTicketHierarchy),
   );
 
-  logger.info('All 10 tools registered');
+  logger.info('All 11 tools registered');
 }
