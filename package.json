@@ -1,0 +1,38 @@
+{
+  "name": "azdo-mcp",
+  "version": "0.1.0",
+  "description": "Azure DevOps MCP Server — manage work items across multiple projects",
+  "main": "dist/index.js",
+  "bin": {
+    "azdo-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "axios": "^1.7.9",
+    "axios-retry": "^4.5.0",
+    "pino": "^9.5.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.ts"]
+  }
+}
