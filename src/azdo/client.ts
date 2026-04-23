@@ -11,7 +11,7 @@ function apiVersion(): string {
 
 async function buildClient(): Promise<AxiosInstance> {
   const { authHeader } = await resolveAuth();
-  const { AZDO_ORG_URL } = getEnv();
+  const { AZDO_ORG_URL, AZDO_DISABLE_PROXY } = getEnv();
 
   if (!AZDO_ORG_URL) {
     throw new OrgUrlError();
@@ -25,6 +25,8 @@ async function buildClient(): Promise<AxiosInstance> {
       Accept: 'application/json',
     },
     timeout: 30_000,
+    // Bypass any HTTPS_PROXY env var — corporate proxies often block Azure DevOps
+    proxy: AZDO_DISABLE_PROXY ? false : undefined,
   });
 
   axiosRetry(client, {
