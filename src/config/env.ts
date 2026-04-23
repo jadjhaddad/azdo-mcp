@@ -29,7 +29,8 @@ const EnvSchema = z.object({
   AZDO_DISABLE_PROXY: z
     .string()
     .optional()
-    .transform((v) => v?.toLowerCase() === 'true'),
+    .default('true')
+    .transform((v) => v?.toLowerCase() !== 'false'),
   LOG_LEVEL: z
     .enum(['trace', 'debug', 'info', 'warn', 'error'])
     .optional()
