@@ -5,7 +5,9 @@ import { getEnv } from '../config/env.js';
 import { mapAxiosError, OrgUrlError } from '../utils/errors.js';
 import { logger } from '../utils/logger.js';
 
-const API_VERSION = '7.2-preview';
+function apiVersion(): string {
+  return getEnv().AZDO_API_VERSION;
+}
 
 async function buildClient(): Promise<AxiosInstance> {
   const { authHeader } = await resolveAuth();
@@ -57,7 +59,7 @@ async function getClient(): Promise<AxiosInstance> {
 export async function azdoGet<T>(path: string, params?: Record<string, unknown>): Promise<T> {
   try {
     const res = await (await getClient()).get<T>(path, {
-      params: { 'api-version': API_VERSION, ...params },
+      params: { 'api-version': apiVersion(), ...params },
     });
     return res.data;
   } catch (err) {
@@ -72,7 +74,7 @@ export async function azdoPost<T>(
 ): Promise<T> {
   try {
     const res = await (await getClient()).post<T>(path, body, {
-      params: { 'api-version': API_VERSION, ...params },
+      params: { 'api-version': apiVersion(), ...params },
     });
     return res.data;
   } catch (err) {
@@ -88,7 +90,7 @@ export async function azdoPatch<T>(
 ): Promise<T> {
   try {
     const res = await (await getClient()).patch<T>(path, body, {
-      params: { 'api-version': API_VERSION, ...params },
+      params: { 'api-version': apiVersion(), ...params },
       ...config,
     });
     return res.data;
@@ -100,7 +102,7 @@ export async function azdoPatch<T>(
 export async function azdoDelete(path: string, params?: Record<string, unknown>): Promise<void> {
   try {
     await (await getClient()).delete(path, {
-      params: { 'api-version': API_VERSION, ...params },
+      params: { 'api-version': apiVersion(), ...params },
     });
   } catch (err) {
     throw mapAxiosError(err);

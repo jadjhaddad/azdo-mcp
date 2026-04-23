@@ -96,10 +96,6 @@ export function mapAxiosError(err: unknown): AzdoMcpError {
   if (status === 404) return new NotFoundError('resource', undefined);
   if (status === 409) return new ConflictError(apiMsg);
   if (status === 429) return new RateLimitedError(apiMsg);
-  if (status === 502 || status === 503) {
-    const url = axErr.config?.baseURL;
-    return new OrgUrlError(url);
-  }
   if (status >= 500) return new AzdoApiError(apiMsg, { status }, true);
 
   return new AzdoApiError(apiMsg, { status });

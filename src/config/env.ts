@@ -25,6 +25,7 @@ const EnvSchema = z.object({
     .string()
     .optional()
     .transform((v) => (v ? parseInt(v, 10) : 200)),
+  AZDO_API_VERSION: z.string().optional().default('7.1'),
   LOG_LEVEL: z
     .enum(['trace', 'debug', 'info', 'warn', 'error'])
     .optional()
