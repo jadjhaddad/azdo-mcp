@@ -60,6 +60,20 @@ export class AzdoApiError extends AzdoMcpError {
   }
 }
 
+export class OrgUrlError extends AzdoMcpError {
+  constructor(orgUrl?: string) {
+    const hint = orgUrl
+      ? `The configured org URL "${orgUrl}" returned a gateway error — it may be incorrect.`
+      : 'No Azure DevOps org URL is configured.';
+    super(
+      'ORG_URL_ERROR',
+      `${hint}\n\nRun the setup tool with the correct URL:\n  setup({ orgUrl: "https://dev.azure.com/your-org", enableDelete: false })`,
+      { orgUrl },
+      false,
+    );
+  }
+}
+
 /** Map an Axios error from the AzDO REST API to a typed domain error */
 export function mapAxiosError(err: unknown): AzdoMcpError {
   if (!(err instanceof Error)) {
@@ -82,6 +96,10 @@ export function mapAxiosError(err: unknown): AzdoMcpError {
   if (status === 404) return new NotFoundError('resource', undefined);
   if (status === 409) return new ConflictError(apiMsg);
   if (status === 429) return new RateLimitedError(apiMsg);
+  if (status === 502 || status === 503) {
+    const url = axErr.config?.baseURL;
+    return new OrgUrlError(url);
+  }
   if (status >= 500) return new AzdoApiError(apiMsg, { status }, true);
 
   return new AzdoApiError(apiMsg, { status });

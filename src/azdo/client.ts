@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import axiosRetry from 'axios-retry';
 import { resolveAuth } from '../auth/contextAuth.js';
 import { getEnv } from '../config/env.js';
-import { mapAxiosError } from '../utils/errors.js';
+import { mapAxiosError, OrgUrlError } from '../utils/errors.js';
 import { logger } from '../utils/logger.js';
 
 const API_VERSION = '7.2-preview';
@@ -12,10 +12,7 @@ async function buildClient(): Promise<AxiosInstance> {
   const { AZDO_ORG_URL } = getEnv();
 
   if (!AZDO_ORG_URL) {
-    throw new Error(
-      'AZDO_ORG_URL is not configured. Add it to the MCP server environment:\n' +
-      '  AZDO_ORG_URL=https://dev.azure.com/your-org',
-    );
+    throw new OrgUrlError();
   }
 
   const client = axios.create({
@@ -33,7 +30,9 @@ async function buildClient(): Promise<AxiosInstance> {
     retryDelay: axiosRetry.exponentialDelay,
     retryCondition: (err) => {
       const status = err.response?.status;
-      // Retry on network errors, 429, and 5xx (but not 401/403/4xx)
+      // 502/503 = bad org URL — fail fast, no retry
+      if (status === 502 || status === 503) return false;
+      // Retry on network errors, 429, and other 5xx
       return axiosRetry.isNetworkError(err) || status === 429 || (!!status && status >= 500);
     },
     onRetry: (count, err) => {
